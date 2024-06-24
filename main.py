@@ -1,13 +1,16 @@
 import os
+import time
+import schedule
+from random import randint
 import requests
 import geocoder
 from dotenv import load_dotenv
 from datetime import datetime
-from applescript import asrun
+from applescript import run
 
 load_dotenv()
 
-def main():
+def update_background():
     # Get location and weather info
     g = geocoder.ip('me')
     location = get_current_weather_prompt(g.latlng)
@@ -15,20 +18,49 @@ def main():
     time = location["current"]["time"]
 
     # Make image
-    background_file = make_stable_diffusion_background(f"An incredible, beautiful, aesthetic, mesmerising 4k desktop wallpaper of location: {g.city}, {g.state}, {g.country} where the time is {time}, the temperature is {temperature} centigrade.")
+    location_wildcard = [
+        "Cafe",
+        "Bar",
+        "Park",
+        "Restaurant",
+        "Library",
+        "Museum",
+        "Theater",
+        "Market",
+        "Street",
+        "Plaza",
+        "Bridge",
+        "Station",
+        "Hotel",
+        "Gym",
+        "Mall",
+        "Garden",
+        "Beach",
+        "Harbor",
+        "Rooftop",
+        "Alley"
+    ]
+    random_location = location_wildcard[randint(0, len(location_wildcard) - 1)]
+    prompt = f"An incredible, beautiful, aesthetic, mesmerising 4k desktop wallpaper in location: {g.city}, {g.state}, {g.country} where the time is {time}, the temperature is {temperature} centigrade. Pay attention to the time of day and make sure the image reflects if it is morning, evening or night time."
+    print(f"Calling Stability AI with prompt: {prompt}")
+    background_file = make_stable_diffusion_background(prompt)
+    print("Image created successfully")
 
     # Create file
-    filename = datetime.now().strftime("%d-%m-%Y | %H:%M:S")
-    file_location = f"./wallpapers/{filename}.webp"
+    filename = datetime.now().strftime("%d-%m-%Y | %I:%M:%S %p ") + random_location
+    file_location = f"./wallpapers/{filename}.jpeg"
     with open(file_location, 'wb') as file:
         file.write(background_file)
+    abs_filepath = os.path.abspath(file_location)
+    print("Setting as background image")
 
     # Set as background image
     cmdTemplate = '''
     tell application "System Events" to tell every desktop to set picture to "{0}"
     '''
-    set_bg = cmdTemplate.format(file_location)
-    asrun(set_bg)
+    set_bg = cmdTemplate.format(abs_filepath)
+    run(set_bg)
+    print("Boom! Enjoy your beautiful background")
 
 
 def get_current_weather_prompt(latlng):
@@ -37,8 +69,6 @@ def get_current_weather_prompt(latlng):
         "latitude": latlng[0],
         "longitude": latlng[1],
         "current": "temperature_2m,wind_speed_10m",
-        "aspect_ratio": "16:9",
-        # "output_format": "jpeg"
     }
 
     response = requests.get(url, params=params)
@@ -50,7 +80,7 @@ def get_current_weather_prompt(latlng):
 def make_stable_diffusion_background(prompt):
     api_key = os.getenv("STABILITY_AI_API_KEY")
     response = requests.post(
-            f"https://api.stability.ai/v2beta/stable-image/generate/ultra",
+            "https://api.stability.ai/v2beta/stable-image/generate/ultra",
             headers={
                 "authorization": f"Bearer {api_key}",
                 "accept": "image/*"
@@ -67,4 +97,13 @@ def make_stable_diffusion_background(prompt):
         return response.content
     else:
         raise Exception(str(response.json()))
-main()
+
+def scheduled_background_change():
+    print("Executing background update at:- " + str(datetime.now()))
+    update_background()
+
+schedule.every(1).hours.do(scheduled_background_change)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
