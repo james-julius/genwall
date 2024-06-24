@@ -3,16 +3,33 @@ import requests
 import geocoder
 from dotenv import load_dotenv
 from datetime import datetime
+from applescript import asrun
 
 load_dotenv()
 
 def main():
+    # Get location and weather info
     g = geocoder.ip('me')
-    current_weather = get_current_weather_prompt(g.latlng)
-    background_file = make_stable_diffusion_background("An incredible desktop wallpaper of San Francisco at night, lofi hacker looking out of window")
+    location = get_current_weather_prompt(g.latlng)
+    temperature = location["current"]["temperature_2m"]
+    time = location["current"]["time"]
+
+    # Make image
+    background_file = make_stable_diffusion_background(f"An incredible, beautiful, aesthetic, mesmerising 4k desktop wallpaper of location: {g.city}, {g.state}, {g.country} where the time is {time}, the temperature is {temperature} centigrade.")
+
+    # Create file
     filename = datetime.now().strftime("%d-%m-%Y | %H:%M:S")
-    with open(f"./wallpapers/{filename}", 'wb') as file:
+    file_location = f"./wallpapers/{filename}.webp"
+    with open(file_location, 'wb') as file:
         file.write(background_file)
+
+    # Set as background image
+    cmdTemplate = '''
+    tell application "System Events" to tell every desktop to set picture to "{0}"
+    '''
+    set_bg = cmdTemplate.format(file_location)
+    asrun(set_bg)
+
 
 def get_current_weather_prompt(latlng):
     url = "https://api.open-meteo.com/v1/forecast"
@@ -27,7 +44,7 @@ def get_current_weather_prompt(latlng):
     response = requests.get(url, params=params)
 
     # Print the response in JSON format
-    print(response.json())
+    return response.json()
 
 
 def make_stable_diffusion_background(prompt):
@@ -41,6 +58,7 @@ def make_stable_diffusion_background(prompt):
             files={"none": ''},
             data={
                 "prompt": prompt,
+                "aspect_ratio": "16:9",
                 "output_format": "webp",
             },
         )
