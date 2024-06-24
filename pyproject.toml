@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "genwall"
+version = "0.1.0"
+description = ""
+authors = ["james-julius <jamesdarby7@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+appscript = "^1.2.5"
+stability-sdk = "^0.8.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
