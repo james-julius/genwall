@@ -5,3 +5,8 @@
 
 wallpapers/
 .DS_Store
+
+services/__pycache__/*
+.pyc
+
+.vscode

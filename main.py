@@ -1,4 +1,5 @@
 import os
+import pytz
 import time
 import random
 import schedule
@@ -20,11 +21,27 @@ random.seed(datetime.now().timestamp() + os.getpid())
 
 
 def update_background(style):
+    print("💻 Updating background...")
     # Get location and weather info
     g = geocoder.ip("me")
     location = get_current_weather_prompt(g.latlng)
     temperature = location["current"]["temperature_2m"]
-    time = location["current"]["time"]
+
+    def get_local_time():
+        # Check for a time zone environment variable or default to system time zone
+        time_zone = os.environ.get('TZ', 'America/Los_Angeles')
+
+        # Set the local time zone
+        local_timezone = pytz.timezone(time_zone)
+
+        # Get the current time in the local time zone
+        local_time = datetime.now(local_timezone)
+
+        # Format the time for the prompt
+        formatted_time = local_time.strftime("%Y-%m-%dT%H:%M")
+        return formatted_time
+
+    time = get_local_time()
 
     # Make image
     location_wildcard = [
