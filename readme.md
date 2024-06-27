@@ -1,6 +1,6 @@
-# Genwall
+# ✨ Genwall ✨
 
-[example_background]()
+![example_background](./example.jpeg)
 
 Genwall is a little script to create a regular background image with Stable Diffusion Ultra. It'll run every hour to update your background image with a newly generated image based on your location and the local weather.
 
