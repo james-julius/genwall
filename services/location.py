@@ -1,5 +1,6 @@
 import requests
 
+
 def get_current_weather_prompt(latlng):
     url = "https://api.open-meteo.com/v1/forecast"
     params = {

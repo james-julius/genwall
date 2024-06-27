@@ -5,18 +5,15 @@ from PIL import Image
 from stability_sdk import client
 
 # Switch to stability GRPC API
-os.environ['STABILITY_HOST'] = 'grpc.stability.ai:443'
+os.environ["STABILITY_HOST"] = "grpc.stability.ai:443"
 
 
 def make_stable_diffusion_background(prompt):
     api_key = os.getenv("STABILITY_AI_API_KEY")
     response = requests.post(
         "https://api.stability.ai/v2beta/stable-image/generate/ultra",
-        headers={
-            "authorization": f"Bearer {api_key}",
-            "accept": "image/*"
-        },
-        files={"none": ''},
+        headers={"authorization": f"Bearer {api_key}", "accept": "image/*"},
+        files={"none": ""},
         data={
             "prompt": prompt,
             "aspect_ratio": "16:9",
