@@ -12,7 +12,7 @@ Genwall is a little script to create a regular background image with Stable Diff
 4. Run `poetry run python main.py` to get started.
 
 ### Pull requests welcome!
-
+```
           ___   ____
         /' --;^/ ,-_\     \ | /
        / / --o\ o-\ \\   --(_)--
@@ -25,3 +25,4 @@ Genwall is a little script to create a regular background image with Stable Diff
       ,;;;;;;;;;;;;;;;;;;;;;;;;,.
 ~~,;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,  ______   ---------   _____     ------
+```
