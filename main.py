@@ -133,6 +133,7 @@ run_options = [
             "Every 30 minutes",
             "Every 15 minutes",
             "Every 5 minutes",
+            "Every minute",
         ],
     ),
 ]
@@ -149,6 +150,8 @@ cadence_choice_map = {
     "Hourly": 60,
     "Every 30 minutes": 30,
     "Every 15 minutes": 30,
+    "Every 5 minutes": 5,
+    "Every minute": 1
 }
 
 cadence = cadence_choice_map[cadence_choice]
