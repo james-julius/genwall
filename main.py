@@ -4,6 +4,7 @@ import time
 import schedule
 from random import randint
 import requests
+import inquirer
 import geocoder
 from PIL import Image
 from dotenv import load_dotenv
@@ -16,7 +17,7 @@ load_dotenv()
 # Switch to stability GRPC API
 os.environ['STABILITY_HOST'] = 'grpc.stability.ai:443'
 
-def update_background():
+def update_background(style):
     # Get location and weather info
     g = geocoder.ip('me')
     location = get_current_weather_prompt(g.latlng)
@@ -50,8 +51,14 @@ def update_background():
     prompt = "An incredible, beautiful, aesthetic, mesmerising 4k desktop wallpaper of"
     space_prompt = "an extraordinary astrological event"
     location_prompt = f"location: {g.city}, {g.state}, {g.country} where the time is {time}, the temperature is {temperature} centigrade."
-    prompt_combo = f"{prompt} {space_prompt}"
 
+    prompt_combo = ""
+    print(style)
+    match style:
+        case "Space":
+            prompt_combo = f"{prompt} {space_prompt}"
+        case "Location-Based":
+            prompt_combo = f"{prompt} {location_prompt}"
     print(f"Calling Stability AI with prompt: {prompt_combo}")
     background_file = make_stable_diffusion_background(prompt_combo)
     print("Image created successfully")
@@ -146,13 +153,24 @@ def upscale_stable_diffusion_background(filepath):
             return big_img
             # big_img.save("imageupscaled" + ".png") # Save our image to a local file.
 
-
+# Ask the user what style they'd like to generate
+style_options = [
+    inquirer.List('style',
+        message="What style of background would you like to generate?",
+        choices=[
+            'Space',
+            'Location-Based'
+        ],
+    ),
+]
+inquiry_answers = inquirer.prompt(style_options)
+style_choice = inquiry_answers['style']
 def scheduled_background_change():
     print("Executing background update at:- " + str(datetime.now()))
-    update_background()
+    update_background(style_choice)
 
 # Update background when script is first run
-update_background()
+update_background(style_choice)
 
 # Then do it every hour
 schedule.every(1).hours.do(scheduled_background_change)

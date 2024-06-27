@@ -79,6 +79,15 @@
         "documentation": {}
     },
     {
+        "label": "inquirer",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "inquirer",
+        "description": "inquirer",
+        "detail": "inquirer",
+        "documentation": {}
+    },
+    {
         "label": "geocoder",
         "kind": 6,
         "isExtraImport": true,
@@ -213,7 +222,7 @@
         "kind": 2,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "def update_background():\n    # Get location and weather info\n    g = geocoder.ip('me')\n    location = get_current_weather_prompt(g.latlng)\n    temperature = location[\"current\"][\"temperature_2m\"]\n    time = location[\"current\"][\"time\"]\n    # Make image\n    location_wildcard = [\n        \"Cafe\",\n        \"Bar\",",
+        "peekOfCode": "def update_background(style):\n    # Get location and weather info\n    g = geocoder.ip('me')\n    location = get_current_weather_prompt(g.latlng)\n    temperature = location[\"current\"][\"temperature_2m\"]\n    time = location[\"current\"][\"time\"]\n    # Make image\n    location_wildcard = [\n        \"Cafe\",\n        \"Bar\",",
         "detail": "main",
         "documentation": {}
     },
@@ -249,7 +258,7 @@
         "kind": 2,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "def scheduled_background_change():\n    print(\"Executing background update at:- \" + str(datetime.now()))\n    update_background()\n# Update background when script is first run\nupdate_background()\n# Then do it every hour\nschedule.every(1).hours.do(scheduled_background_change)\nwhile True:\n    schedule.run_pending()\n    time.sleep(1)",
+        "peekOfCode": "def scheduled_background_change():\n    print(\"Executing background update at:- \" + str(datetime.now()))\n    update_background(style_choice)\n# Update background when script is first run\nupdate_background(style_choice)\n# Then do it every hour\nschedule.every(1).hours.do(scheduled_background_change)\nwhile True:\n    schedule.run_pending()\n    time.sleep(1)",
         "detail": "main",
         "documentation": {}
     },
@@ -258,7 +267,34 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "os.environ['STABILITY_HOST'] = 'grpc.stability.ai:443'\ndef update_background():\n    # Get location and weather info\n    g = geocoder.ip('me')\n    location = get_current_weather_prompt(g.latlng)\n    temperature = location[\"current\"][\"temperature_2m\"]\n    time = location[\"current\"][\"time\"]\n    # Make image\n    location_wildcard = [\n        \"Cafe\",",
+        "peekOfCode": "os.environ['STABILITY_HOST'] = 'grpc.stability.ai:443'\ndef update_background(style):\n    # Get location and weather info\n    g = geocoder.ip('me')\n    location = get_current_weather_prompt(g.latlng)\n    temperature = location[\"current\"][\"temperature_2m\"]\n    time = location[\"current\"][\"time\"]\n    # Make image\n    location_wildcard = [\n        \"Cafe\",",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "style_options",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "style_options = [\n    inquirer.List('style',\n        message=\"What style of background would you like to generate?\",\n        choices=[\n            'Space',\n            'Location-Based'\n        ],\n    ),\n]\ninquiry_answers = inquirer.prompt(style_options)",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "inquiry_answers",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "inquiry_answers = inquirer.prompt(style_options)\nstyle_choice = inquiry_answers['style']\ndef scheduled_background_change():\n    print(\"Executing background update at:- \" + str(datetime.now()))\n    update_background(style_choice)\n# Update background when script is first run\nupdate_background(style_choice)\n# Then do it every hour\nschedule.every(1).hours.do(scheduled_background_change)\nwhile True:",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "style_choice",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "style_choice = inquiry_answers['style']\ndef scheduled_background_change():\n    print(\"Executing background update at:- \" + str(datetime.now()))\n    update_background(style_choice)\n# Update background when script is first run\nupdate_background(style_choice)\n# Then do it every hour\nschedule.every(1).hours.do(scheduled_background_change)\nwhile True:\n    schedule.run_pending()",
         "detail": "main",
         "documentation": {}
     }
