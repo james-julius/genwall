@@ -63,7 +63,7 @@ def update_background(style):
     background_file = make_stable_diffusion_background(prompt_combo)
     print("Image created successfully")
     # Create file
-    filename = datetime.now().strftime("%d-%m-%Y | %I:%M:%S %p ") + random_location
+    filename = datetime.now().strftime("%d-%m-%Y | %I:%M:%S %p ") + (random_location if style == "Location-Based" else "space")
     file_location = f"./wallpapers/{filename}.jpeg"
     with open(file_location, 'wb') as file:
         file.write(background_file)
