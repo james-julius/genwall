@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Genwall",
+            "consoleTitle": "Genwall Debug 🪲",
+            "type": "debugpy",
+            "request": "launch",
+            "env": {"PYDEVD_DISABLE_FILE_VALIDATION": "1"},
+            "module": "poetry",
+            "args": [
+                "run",
+                "python",
+                "main.py",
+            ],
+            "jinja": true,
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

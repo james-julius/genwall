@@ -1,14 +1,20 @@
+import io
 import os
 import time
 import schedule
 from random import randint
 import requests
 import geocoder
+from PIL import Image
 from dotenv import load_dotenv
 from datetime import datetime
 from applescript import run
+from stability_sdk import client
 
 load_dotenv()
+
+# Switch to stability GRPC API
+os.environ['STABILITY_HOST'] = 'grpc.stability.ai:443'
 
 def update_background():
     # Get location and weather info
@@ -41,24 +47,35 @@ def update_background():
         "Alley"
     ]
     random_location = location_wildcard[randint(0, len(location_wildcard) - 1)]
-    prompt = f"An incredible, beautiful, aesthetic, mesmerising 4k desktop wallpaper in location: {g.city}, {g.state}, {g.country} where the time is {time}, the temperature is {temperature} centigrade. Pay attention to the time of day and make sure the image reflects if it is morning, evening or night time."
-    print(f"Calling Stability AI with prompt: {prompt}")
-    background_file = make_stable_diffusion_background(prompt)
-    print("Image created successfully")
+    prompt = "An incredible, beautiful, aesthetic, mesmerising 4k desktop wallpaper of"
+    space_prompt = "an extraordinary astrological event"
+    location_prompt = f"location: {g.city}, {g.state}, {g.country} where the time is {time}, the temperature is {temperature} centigrade."
+    prompt_combo = f"{prompt} {space_prompt}"
 
+    print(f"Calling Stability AI with prompt: {prompt_combo}")
+    background_file = make_stable_diffusion_background(prompt_combo)
+    print("Image created successfully")
     # Create file
     filename = datetime.now().strftime("%d-%m-%Y | %I:%M:%S %p ") + random_location
     file_location = f"./wallpapers/{filename}.jpeg"
     with open(file_location, 'wb') as file:
         file.write(background_file)
     abs_filepath = os.path.abspath(file_location)
+
+    print("Upscaling image")
+    upscaled_background = upscale_stable_diffusion_background(abs_filepath)
+
+    upscaled_file_location = f"./wallpapers/{filename}-upscaled.jpeg"
+    with open(upscaled_file_location, 'wb') as file:
+        file.write(upscaled_background.getbuffer())
+    upscaled_abs_filepath = os.path.abspath(upscaled_file_location)
     print("Setting as background image")
 
     # Set as background image
     cmdTemplate = '''
     tell application "System Events" to tell every desktop to set picture to "{0}"
     '''
-    set_bg = cmdTemplate.format(abs_filepath)
+    set_bg = cmdTemplate.format(upscaled_abs_filepath)
     run(set_bg)
     print("Boom! Enjoy your beautiful background")
 
@@ -98,10 +115,46 @@ def make_stable_diffusion_background(prompt):
     else:
         raise Exception(str(response.json()))
 
+
+def upscale_stable_diffusion_background(filepath):
+    api_key = os.getenv("STABILITY_AI_API_KEY")
+    stability_api = client.StabilityInference(
+        key=api_key,  # API Key reference.
+        # The name of the upscaling model we want to use.
+        upscale_engine="esrgan-v1-x2plus",
+        # Available Upscaling Engines: esrgan-v1-x2plus
+        verbose=True,  # Print debug messages.
+    )
+    img = Image.open(filepath)
+
+
+    answers = stability_api.upscale(
+        # Pass our image to the API and call the upscaling process.
+        init_image=img,
+        width=2048, # Optional parameter to specify the desired output width.
+    )
+    # Set up our warning to print to the console if the adult content classifier is tripped.
+    # If adult content classifier is not tripped, save our image.
+
+    for resp in answers:
+        for artifact in resp.artifacts:
+            # if artifact.finish_reason == generation.FILTER:
+            #     print(
+            #         "Your request activated the API's safety filters and could not be processed."
+            #         "Please submit a different image and try again.")
+            big_img = io.BytesIO(artifact.binary)
+            return big_img
+            # big_img.save("imageupscaled" + ".png") # Save our image to a local file.
+
+
 def scheduled_background_change():
     print("Executing background update at:- " + str(datetime.now()))
     update_background()
 
+# Update background when script is first run
+update_background()
+
+# Then do it every hour
 schedule.every(1).hours.do(scheduled_background_change)
 
 while True:
