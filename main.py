@@ -1,6 +1,7 @@
 import os
 import pytz
 import time
+import pywal
 import random
 import schedule
 import geocoder
@@ -16,7 +17,6 @@ from services.stability_ai import (
 )
 
 load_dotenv()
-
 
 def update_background(style):
     print("💻 Updating background...")
@@ -41,19 +41,18 @@ def update_background(style):
 
     time = get_local_time()
 
-    # Set a more unpredictable random seed
-    random.seed(time)
     # Make image
     random_location = get_random_location()
     prompt = "An incredible, beautiful, aesthetic, mesmerising 4k desktop wallpaper of"
 
     # Style prompts
     abstract_prompt = prompt + " abstract shapes"
+    
     japan_prompt = prompt + "---one instance--- of somewhere specific in Japan, or something Japanese"
     space_prompt = prompt + " an extraordinary astrological event"
     location_prompt = (
         prompt
-        + f" location: {g.city}, {g.state}, {g.country} where the time is {time}, the temperature is {temperature} centigrade."
+        + f" location: {g.city}, {g.state}, {g.country}, place: {random_location} where the time is {time}, the temperature is {temperature} centigrade."
     )
 
     prompt_combo = ""
@@ -82,14 +81,13 @@ def update_background(style):
     print("Image created successfully")
 
     # Create file
-    filename = datetime.now().strftime("%d-%m-%Y | %I:%M:%S %p ") + (
+    filename = datetime.now().strftime("%d-%m-%Y-%I:%M:%S%p-") + (
        style
     )
     file_location = f"./wallpapers/{filename}.jpeg"
     with open(file_location, "wb") as file:
         file.write(background_file)
     abs_filepath = os.path.abspath(file_location)
-    print(f"Saved file to: {file_location}")
 
     print("Upscaling image")
     upscaled_background = upscale_stable_diffusion_background(abs_filepath)
@@ -97,12 +95,18 @@ def update_background(style):
 
     print("Writing file")
     upscaled_file_location = f"./wallpapers/{filename}-upscaled.jpeg"
+
     with open(upscaled_file_location, "wb") as file:
         file.write(upscaled_background.getbuffer())
     upscaled_abs_filepath = os.path.abspath(upscaled_file_location)
 
+    print(f"Saved file to: {abs_filepath}")
+    # Remove non-upscaled image
+    os.remove(file_location)
+
     print("Setting as background image")
 
+    pywal.wallpaper.change(img=upscaled_abs_filepath)
     # Set as background image
     cmdTemplate = """
     tell application "System Events" to tell every desktop to set picture to "{0}"
@@ -114,13 +118,17 @@ def update_background(style):
 
 style, cadence = run_setup_inquiry()
 
+
 def scheduled_background_change():
     print("Executing background update at:- " + str(datetime.now()))
+    # Set a more unpredictable random seed
+    random.seed(datetime.now().timestamp())
     update_background(style)
 
 
 # Update background when script is first run
 update_background(style)
+
 
 # Then do it regularly
 schedule.every(cadence).minutes.do(scheduled_background_change)

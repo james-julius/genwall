@@ -11,7 +11,7 @@ def wrap_prompt(starter_prompt):
         messages=[
             {
                 "role": "user",
-                "content": f"make the ultimate text prompt for a 4k wallpaper that begins from this initial prompt: {starter_prompt}",
+                "content": f"make the ultimate text prompt for a 4k wallpaper that begins from this initial prompt: {starter_prompt}. Be specific. If the prompt is subjective, convert it to a specific objective visual example that satisfies the prompt criteria",
             }
         ],
         model="gpt-3.5-turbo",

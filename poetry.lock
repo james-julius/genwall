@@ -798,6 +798,16 @@ files = [
 ]
 
 [[package]]
+name = "pywal"
+version = "3.3.0"
+description = "Generate and change color-schemes on the fly"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "pywal-3.3.0.tar.gz", hash = "sha256:efeab992c2702c7e07529ac9757425862ea1796a6fc0331148bc45a8675230b7"},
+]
+
+[[package]]
 name = "ratelim"
 version = "0.1.6"
 description = "Makes it easy to respect rate limits."
@@ -1004,4 +1014,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "f779fd83484d4a8e56ff5c05ced7faba36c3c8deba021d49ce8b0871a0b39440"
+content-hash = "a4d3cfa93e5f4417aefbe15a9289215670cebcc025b39fb4df859dd1ab589f4e"
