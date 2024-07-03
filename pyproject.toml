@@ -14,6 +14,7 @@ applescript = "^2021.2.9"
 schedule = "^1.2.2"
 inquirer = "^3.3.0"
 pytz = "^2024.1"
+openai = "^1.35.9"
 
 
 [build-system]

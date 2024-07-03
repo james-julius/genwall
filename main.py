@@ -3,21 +3,19 @@ import pytz
 import time
 import random
 import schedule
-import inquirer
 import geocoder
 from dotenv import load_dotenv
 from datetime import datetime
 from applescript import run
-from services.location import get_current_weather_prompt
+from services.location import get_current_weather_prompt, get_random_location
+from services.open_ai import wrap_prompt
+from services.setup_inquiry import run_setup_inquiry
 from services.stability_ai import (
     make_stable_diffusion_background,
     upscale_stable_diffusion_background,
 )
 
 load_dotenv()
-
-# Set a more unpredictable random seed
-random.seed(datetime.now().timestamp() + os.getpid())
 
 
 def update_background(style):
@@ -43,36 +41,16 @@ def update_background(style):
 
     time = get_local_time()
 
+    # Set a more unpredictable random seed
+    random.seed(time)
     # Make image
-    location_wildcard = [
-        "Cafe",
-        "Bar",
-        "Park",
-        "Restaurant",
-        "Library",
-        "Museum",
-        "Theater",
-        "Market",
-        "Street",
-        "Plaza",
-        "Bridge",
-        "Station",
-        "Hotel",
-        "Gym",
-        "Mall",
-        "Garden",
-        "Beach",
-        "Harbor",
-        "Rooftop",
-        "Alley",
-    ]
-
-    random_location = location_wildcard[random.randint(0, len(location_wildcard) - 1)]
+    random_location = get_random_location()
     prompt = "An incredible, beautiful, aesthetic, mesmerising 4k desktop wallpaper of"
 
     # Style prompts
-    space_prompt = prompt + " an extraordinary astrological event"
     abstract_prompt = prompt + " abstract shapes"
+    japan_prompt = prompt + "---one instance--- of somewhere specific in Japan, or something Japanese"
+    space_prompt = prompt + " an extraordinary astrological event"
     location_prompt = (
         prompt
         + f" location: {g.city}, {g.state}, {g.country} where the time is {time}, the temperature is {temperature} centigrade."
@@ -83,6 +61,8 @@ def update_background(style):
     match style:
         case "Abstract":
             prompt_combo = abstract_prompt
+        case "Japan":
+            prompt_combo = japan_prompt
         case "Space":
             prompt_combo = space_prompt
         case "Location-Based":
@@ -92,18 +72,24 @@ def update_background(style):
             prompt_list = [abstract_prompt, space_prompt, location_prompt]
             prompt_combo = prompt_list[random_choice]
 
-    print(f"Calling Stability AI with prompt: {prompt_combo}")
-    background_file = make_stable_diffusion_background(prompt_combo)
+    print(f"Initial prompt: {prompt_combo}")
+    print("Calling OpenAI to get a more creative prompt from the initial generation")
+    improved_prompt = wrap_prompt(prompt_combo)
+
+
+    print(f"Calling Stability AI with prompt: {improved_prompt}")
+    background_file = make_stable_diffusion_background(improved_prompt)
     print("Image created successfully")
 
     # Create file
     filename = datetime.now().strftime("%d-%m-%Y | %I:%M:%S %p ") + (
-        random_location if style == "Location-Based" else "space"
+       style
     )
     file_location = f"./wallpapers/{filename}.jpeg"
     with open(file_location, "wb") as file:
         file.write(background_file)
     abs_filepath = os.path.abspath(file_location)
+    print(f"Saved file to: {file_location}")
 
     print("Upscaling image")
     upscaled_background = upscale_stable_diffusion_background(abs_filepath)
@@ -126,61 +112,15 @@ def update_background(style):
     print("✨ Enjoy your beautiful background ✨")
 
 
-# Ask the user what style they'd like to generate
-run_options = [
-    inquirer.List(
-        "style",
-        message="What style of background would you like to generate?",
-        choices=[
-            "Space",
-            "Location-Based",
-            "Abstract",
-            "Mixed",
-        ],
-    ),
-    inquirer.List(
-        "cadence",
-        message="How often would you like it to change?",
-        choices=[
-            "Daily",
-            "Every 8 hours",
-            "Every 4 hours",
-            "Every 2 hours",
-            "Hourly",
-            "Every 30 minutes",
-            "Every 15 minutes",
-            "Every 5 minutes",
-            "Every minute",
-        ],
-    ),
-]
-
-inquiry_answers = inquirer.prompt(run_options)
-style_choice = inquiry_answers["style"]
-cadence_choice = inquiry_answers["cadence"]
-
-cadence_choice_map = {
-    "Daily": 1440,
-    "Every 8 hours": 480,
-    "Every 4 hours": 240,
-    "Every 2 hours": 120,
-    "Hourly": 60,
-    "Every 30 minutes": 30,
-    "Every 15 minutes": 30,
-    "Every 5 minutes": 5,
-    "Every minute": 1
-}
-
-cadence = cadence_choice_map[cadence_choice]
-
+style, cadence = run_setup_inquiry()
 
 def scheduled_background_change():
     print("Executing background update at:- " + str(datetime.now()))
-    update_background(style_choice)
+    update_background(style)
 
 
 # Update background when script is first run
-update_background(style_choice)
+update_background(style)
 
 # Then do it regularly
 schedule.every(cadence).minutes.do(scheduled_background_change)
