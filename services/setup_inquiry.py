@@ -8,6 +8,7 @@ def run_setup_inquiry():
             message="What style of background would you like to generate?",
             choices=[
                 "Space",
+                "Random Country",
                 "Japan",
                 "Location-Based",
                 "Abstract",

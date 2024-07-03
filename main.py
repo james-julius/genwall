@@ -8,7 +8,7 @@ import geocoder
 from dotenv import load_dotenv
 from datetime import datetime
 from applescript import run
-from services.location import get_current_weather_prompt, get_random_location
+from services.location import get_current_weather_prompt, get_random_country, get_random_location
 from services.open_ai import wrap_prompt
 from services.setup_inquiry import run_setup_inquiry
 from services.stability_ai import (
@@ -47,7 +47,7 @@ def update_background(style):
 
     # Style prompts
     abstract_prompt = prompt + " abstract shapes"
-    
+    random_country_prompt = prompt + f"---one instance--- of somewhere specific or emblematic of {get_random_country()}"
     japan_prompt = prompt + "---one instance--- of somewhere specific in Japan, or something Japanese"
     space_prompt = prompt + " an extraordinary astrological event"
     location_prompt = (
@@ -60,6 +60,8 @@ def update_background(style):
     match style:
         case "Abstract":
             prompt_combo = abstract_prompt
+        case "Random Country":
+            prompt_combo = random_country_prompt
         case "Japan":
             prompt_combo = japan_prompt
         case "Space":
