@@ -69,8 +69,8 @@ def update_background(style):
         case "Location-Based":
             prompt_combo = location_prompt
         case "Mixed":
-            random_choice = random.randint(0, 2)
-            prompt_list = [abstract_prompt, space_prompt, location_prompt]
+            prompt_list = [abstract_prompt, random_country_prompt, space_prompt, location_prompt, japan_prompt]
+            random_choice = random.randint(0, len(prompt_list) - 1)
             prompt_combo = prompt_list[random_choice]
 
     print(f"Initial prompt: {prompt_combo}")
@@ -133,7 +133,7 @@ update_background(style)
 
 
 # Then do it regularly
-schedule.every(cadence).minutes.do(scheduled_background_change)
+schedule.every(cadence).seconds.do(scheduled_background_change)
 
 while True:
     schedule.run_pending()
