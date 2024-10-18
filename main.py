@@ -83,9 +83,10 @@ def update_background(style):
     print("Image created successfully")
 
     # Create file
-    filename = datetime.now().strftime("%d-%m-%Y-%I:%M:%S%p-") + (
+    filename = (
        style
-    )
+    ) + datetime.now().strftime("%d-%m-%Y-%I:%M:%S%p-")
+    
     file_location = f"./wallpapers/{filename}.jpeg"
     with open(file_location, "wb") as file:
         file.write(background_file)
