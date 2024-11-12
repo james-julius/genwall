@@ -89,7 +89,7 @@ def update_background(style, custom_style = ""):
 
     # Create file
     filename = (
-       custom_style if custom_style else style
+       style
     ) + datetime.now().strftime("%d-%m-%Y-%I:%M:%S%p-")
 
 
@@ -143,7 +143,7 @@ update_background(style, custom_style)
 
 
 # Then do it regularly
-schedule.every(cadence).seconds.do(scheduled_background_change)
+schedule.every(cadence).minutes.do(scheduled_background_change)
 
 while True:
     schedule.run_pending()
