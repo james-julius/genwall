@@ -6,6 +6,7 @@
 wallpapers/
 .DS_Store
 
+__pycache__
 services/__pycache__/*
 .pyc
 

@@ -18,7 +18,7 @@ from services.stability_ai import (
 
 load_dotenv()
 
-def update_background(style):
+def update_background(style, custom_style = ""):
     print("💻 Updating background...")
     # Get location and weather info
     g = geocoder.ip("me")
@@ -47,6 +47,7 @@ def update_background(style):
 
     # Style prompts
     abstract_prompt = prompt + " abstract shapes"
+    custom_prompt = f"{prompt} {custom_style or ''}"
     random_country_prompt = prompt + f"---one instance--- of somewhere specific or emblematic of {get_random_country()}"
     japan_prompt = prompt + "---one instance--- of somewhere specific in Japan, or something Japanese"
     space_prompt = prompt + " an extraordinary astrological event"
@@ -56,22 +57,26 @@ def update_background(style):
     )
 
     prompt_combo = ""
-
-    match style:
-        case "Abstract":
-            prompt_combo = abstract_prompt
-        case "Random Country":
-            prompt_combo = random_country_prompt
-        case "Japan":
-            prompt_combo = japan_prompt
-        case "Space":
-            prompt_combo = space_prompt
-        case "Location-Based":
-            prompt_combo = location_prompt
-        case "Mixed":
-            prompt_list = [abstract_prompt, random_country_prompt, space_prompt, location_prompt, japan_prompt]
-            random_choice = random.randint(0, len(prompt_list) - 1)
-            prompt_combo = prompt_list[random_choice]
+    if custom_style is not None:
+        prompt_combo = custom_prompt
+    else:
+        match style:
+            case "Abstract":
+                prompt_combo = abstract_prompt
+            case "Custom":
+                prompt_combo = custom_prompt
+            case "Random Country":
+                prompt_combo = random_country_prompt
+            case "Japan":
+                prompt_combo = japan_prompt
+            case "Space":
+                prompt_combo = space_prompt
+            case "Location-Based":
+                prompt_combo = location_prompt
+            case "Mixed":
+                prompt_list = [abstract_prompt, random_country_prompt, space_prompt, location_prompt, japan_prompt]
+                random_choice = random.randint(0, len(prompt_list) - 1)
+                prompt_combo = prompt_list[random_choice]
 
     print(f"Initial prompt: {prompt_combo}")
     print("Calling OpenAI to get a more creative prompt from the initial generation")
@@ -86,21 +91,25 @@ def update_background(style):
     filename = (
        style
     ) + datetime.now().strftime("%d-%m-%Y-%I:%M:%S%p-")
-    
-    file_location = f"./wallpapers/{filename}.jpeg"
+
+
+    if not os.path.exists(os.path.abspath(f"./wallpapers/{style}")):
+        os.makedirs(f"./wallpapers/{style}")
+
+    file_location = f"./wallpapers/{style}/{filename}.jpeg"
     with open(file_location, "wb") as file:
         file.write(background_file)
     abs_filepath = os.path.abspath(file_location)
 
     print("Upscaling image")
-    upscaled_background = upscale_stable_diffusion_background(abs_filepath)
+    upscaled_background = upscale_stable_diffusion_background(abs_filepath, improved_prompt)
     print("Successfully upscaled image")
 
     print("Writing file")
     upscaled_file_location = f"./wallpapers/{filename}-upscaled.jpeg"
 
     with open(upscaled_file_location, "wb") as file:
-        file.write(upscaled_background.getbuffer())
+        file.write(upscaled_background)
     upscaled_abs_filepath = os.path.abspath(upscaled_file_location)
 
     print(f"Saved file to: {abs_filepath}")
@@ -119,18 +128,18 @@ def update_background(style):
     print("✨ Enjoy your beautiful background ✨")
 
 
-style, cadence = run_setup_inquiry()
+style, custom_style, cadence = run_setup_inquiry()
 
 
 def scheduled_background_change():
     print("Executing background update at:- " + str(datetime.now()))
     # Set a more unpredictable random seed
     random.seed(datetime.now().timestamp())
-    update_background(style)
+    update_background(style, custom_style)
 
 
 # Update background when script is first run
-update_background(style)
+update_background(style, custom_style)
 
 
 # Then do it regularly

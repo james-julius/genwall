@@ -2,11 +2,12 @@ import inquirer
 
 def run_setup_inquiry():
     # Ask the user what style they'd like to generate
-    run_options = [
+    style_inquiry = [
         inquirer.List(
             "style",
             message="What style of background would you like to generate?",
             choices=[
+                "Custom",
                 "Space",
                 "Random Country",
                 "Japan",
@@ -15,26 +16,42 @@ def run_setup_inquiry():
                 "Mixed",
             ],
         ),
+    ]
+
+    style_inquiry = inquirer.prompt(style_inquiry)
+    style_choice = style_inquiry["style"]
+    custom_style_inquiry = None
+    custom_style_choice = None
+
+    if style_inquiry["style"] == "Custom":
+        custom_style_inquiry = inquirer.prompt([
+            inquirer.Text(
+                "custom_style",
+                message="Please enter a custom background style to generate"
+            )
+        ])
+        custom_style_choice = custom_style_inquiry["custom_style"]
+
+
+    cadence_inquiry = inquirer.prompt([
         inquirer.List(
             "cadence",
             message="How often would you like it to change?",
             choices=[
-                "Daily",
-                "Every 8 hours",
-                "Every 4 hours",
-                "Every 2 hours",
-                "Hourly",
-                "Every 30 minutes",
-                "Every 15 minutes",
-                "Every 5 minutes",
                 "Every minute",
+                "Every 5 minutes",
+                "Every 15 minutes",
+                "Every 30 minutes",
+                "Hourly",
+                "Every 2 hours",
+                "Every 4 hours",
+                "Every 8 hours",
+                "Daily",
             ],
         ),
-    ]
+    ])
 
-    inquiry_answers = inquirer.prompt(run_options)
-    style_choice = inquiry_answers["style"]
-    cadence_choice = inquiry_answers["cadence"]
+    cadence_choice = cadence_inquiry["cadence"]
 
     cadence_choice_map = {
         "Daily": 1440,
@@ -50,4 +67,4 @@ def run_setup_inquiry():
 
     cadence = cadence_choice_map[cadence_choice]
 
-    return (style_choice, cadence)
+    return (style_choice, custom_style_choice, cadence)
