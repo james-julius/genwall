@@ -1,7 +1,5 @@
-import io
 import os
 import requests
-from PIL import Image
 
 def make_stable_diffusion_background(prompt):
     api_key = os.getenv("STABILITY_AI_API_KEY")

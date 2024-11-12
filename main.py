@@ -89,7 +89,7 @@ def update_background(style, custom_style = ""):
 
     # Create file
     filename = (
-       style
+       custom_style if custom_style else style
     ) + datetime.now().strftime("%d-%m-%Y-%I:%M:%S%p-")
 
 
