@@ -2,11 +2,6 @@ import io
 import os
 import requests
 from PIL import Image
-from stability_sdk import client
-
-# Switch to stability GRPC API
-os.environ["STABILITY_HOST"] = "grpc.stability.ai:443"
-
 
 def make_stable_diffusion_background(prompt):
     api_key = os.getenv("STABILITY_AI_API_KEY")
